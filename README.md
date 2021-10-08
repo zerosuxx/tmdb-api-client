@@ -1,8 +1,8 @@
 # The Movie Database Api Client
 
-## Install
+## Install package
 ```shell
-$ composer install
+$ composer require zerosuxx/tmdb-api-client
 ```
 
 ## Usage
