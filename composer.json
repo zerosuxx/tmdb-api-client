@@ -27,6 +27,6 @@
         }
     },
     "scripts": {
-        "test": "phpunit --testdox tests/"
+        "test": "phpunit --testdox --do-not-cache-result tests/"
     }
 }
