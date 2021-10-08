@@ -26,10 +26,7 @@ class TheMovieDatabaseApiClient
      */
     public function fetchTopRatedMovies(int $pageNumber): array
     {
-        $url = self::API_BASE_URL . "/movie/top_rated?page={$pageNumber}&api_key={$this->apiToken}";
-        $response = $this->httpClient->request('GET', $url);
-
-        return $this->getResult($response)['results'];
+        return $this->sendRequest("/movie/top_rated", ['page' => $pageNumber])['results'];
     }
 
     /**
@@ -37,10 +34,7 @@ class TheMovieDatabaseApiClient
      */
     public function fetchMovieDetails(int $movieId): array
     {
-        $url = self::API_BASE_URL . "/movie/{$movieId}?api_key={$this->apiToken}";
-        $response = $this->httpClient->request('GET', $url);
-
-        return $this->getResult($response);
+        return $this->sendRequest("/movie/{$movieId}");
     }
 
     /**
@@ -48,13 +42,22 @@ class TheMovieDatabaseApiClient
      */
     public function fetchMovieCredits(int $movieId): array
     {
-        $url = self::API_BASE_URL . "/movie/{$movieId}/credits?api_key={$this->apiToken}";
-        $response = $this->httpClient->request('GET', $url);
-
-        return $this->getResult($response);
+        return $this->sendRequest("/movie/{$movieId}/credits");
     }
 
-    private function getResult(ResponseInterface $response): array
+    /**
+     * @throws GuzzleException
+     */
+    private function sendRequest(string $path, array $queryParameters = []): array
+    {
+        $query = http_build_query(array_merge($queryParameters, ['api_key' => $this->apiToken]));
+        $url = self::API_BASE_URL . "{$path}?{$query}";
+        $response = $this->httpClient->request('GET', $url);
+
+        return $this->transformResponseBody($response);
+    }
+
+    private function transformResponseBody(ResponseInterface $response): array
     {
         $contents = $response->getBody()->getContents();
 
