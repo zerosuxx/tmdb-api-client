@@ -29,14 +29,24 @@ class TheMovieDatabaseApiClient
         $url = self::API_BASE_URL . "/movie/top_rated?page={$pageNumber}&api_key={$this->apiToken}";
         $response = $this->httpClient->request('GET', $url);
 
-        return $this->transformResponse($response);
+        return $this->getResult($response)['results'];
     }
 
-    private function transformResponse(ResponseInterface $response): array
+    /**
+     * @throws GuzzleException
+     */
+    public function fetchMovieDetails(int $movieId): array
+    {
+        $url = self::API_BASE_URL . "/movie/{$movieId}?api_key={$this->apiToken}";
+        $response = $this->httpClient->request('GET', $url);
+
+        return $this->getResult($response);
+    }
+
+    private function getResult(ResponseInterface $response): array
     {
         $contents = $response->getBody()->getContents();
-        $result = json_decode($contents, true);
 
-        return $result['results'];
+        return json_decode($contents, true);
     }
 }
