@@ -10,6 +10,8 @@ use Psr\Http\Message\ResponseInterface;
 
 class TheMovieDatabaseApiClient
 {
+    private const API_BASE_URL = 'https://api.themoviedb.org/3';
+
     private Client $httpClient;
     private string $apiToken;
 
@@ -24,7 +26,7 @@ class TheMovieDatabaseApiClient
      */
     public function fetchTopRatedMovies(int $pageNumber): array
     {
-        $url = "https://api.themoviedb.org/3/movie/top_rated?page={$pageNumber}&api_key={$this->apiToken}";
+        $url = self::API_BASE_URL . "/movie/top_rated?page={$pageNumber}&api_key={$this->apiToken}";
         $response = $this->httpClient->request('GET', $url);
 
         return $this->transformResponse($response);
