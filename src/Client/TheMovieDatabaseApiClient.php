@@ -43,6 +43,17 @@ class TheMovieDatabaseApiClient
         return $this->getResult($response);
     }
 
+    /**
+     * @throws GuzzleException
+     */
+    public function fetchMovieCredits(int $movieId): array
+    {
+        $url = self::API_BASE_URL . "/movie/{$movieId}/credits?api_key={$this->apiToken}";
+        $response = $this->httpClient->request('GET', $url);
+
+        return $this->getResult($response);
+    }
+
     private function getResult(ResponseInterface $response): array
     {
         $contents = $response->getBody()->getContents();

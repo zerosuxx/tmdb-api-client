@@ -148,4 +148,60 @@ class TheMovieDatabaseApiClientTest extends TestCase
 
         $this->assertEquals($expectedResult, $result);
     }
+
+    /**
+     * @test
+     */
+    public function fetchMovieCredits_NetworkIssue_ThrowsException()
+    {
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->willThrowException(new TransferException('Something went wrong'));
+
+        $this->expectException(GuzzleException::class);
+
+        $this->underTest->fetchMovieCredits(self::MOVIE_ID);
+    }
+
+    /**
+     * @test
+     */
+    public function fetchMovieCredits_Perfect_CallsHttpClientWithProperParameters()
+    {
+        $token = 'example-token';
+        $movieId = self::MOVIE_ID;
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with('GET', "https://api.themoviedb.org/3/movie/{$movieId}/credits?api_key={$token}")
+            ->willReturn(new Response(200, [], json_encode(['results' => []])));
+
+        $this->underTest->fetchMovieCredits(self::MOVIE_ID);
+    }
+
+    /**
+     * @test
+     */
+    public function fetchMovieCredits_Perfect_Perfect()
+    {
+        $expectedResult = [
+            'id' => self::MOVIE_ID,
+            'cast' => [],
+            'crew' => []
+        ];
+
+        $responseBody = json_encode($expectedResult);
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->willReturn($response);
+
+        $result = $this->underTest->fetchMovieCredits(self::MOVIE_ID);
+
+        $this->assertEquals($expectedResult, $result);
+    }
 }
