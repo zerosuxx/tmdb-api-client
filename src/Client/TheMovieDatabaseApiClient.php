@@ -48,6 +48,14 @@ class TheMovieDatabaseApiClient
     /**
      * @throws GuzzleException
      */
+    public function fetchPerson(int $personId): array
+    {
+        return $this->sendRequest("/person/{$personId}");
+    }
+
+    /**
+     * @throws GuzzleException
+     */
     private function sendRequest(string $path, array $queryParameters = []): array
     {
         $query = http_build_query(array_merge($queryParameters, ['api_key' => $this->apiToken]));

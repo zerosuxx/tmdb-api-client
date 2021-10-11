@@ -15,6 +15,7 @@ class TheMovieDatabaseApiClientTest extends TestCase
 {
     private const API_TOKEN = 'example-token';
     private const MOVIE_ID = 867351;
+    private const PERSON_ID = 27193;
 
     private Client $httpClientMock;
     private TheMovieDatabaseApiClient $underTest;
@@ -201,6 +202,63 @@ class TheMovieDatabaseApiClientTest extends TestCase
             ->willReturn($response);
 
         $result = $this->underTest->fetchMovieCredits(self::MOVIE_ID);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+
+    /**
+     * @test
+     */
+    public function fetchPerson_NetworkIssue_ThrowsException()
+    {
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->willThrowException(new TransferException('Something went wrong'));
+
+        $this->expectException(GuzzleException::class);
+
+        $this->underTest->fetchPerson(self::PERSON_ID);
+    }
+
+    /**
+     * @test
+     */
+    public function fetchPerson_Perfect_CallsHttpClientWithProperParameters()
+    {
+        $token = 'example-token';
+        $personId = self::PERSON_ID;
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with('GET', "https://api.themoviedb.org/3/person/{$personId}?api_key={$token}")
+            ->willReturn(new Response(200, [], json_encode(['results' => []])));
+
+        $this->underTest->fetchPerson(self::PERSON_ID);
+    }
+
+    /**
+     * @test
+     */
+    public function fetchPerson_Perfect_Perfect()
+    {
+        $expectedResult = [
+            'id' => self::PERSON_ID,
+            'name' => 'Brad Pitt',
+            'birthday' => '1992-03-11'
+        ];
+
+        $responseBody = json_encode($expectedResult);
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->willReturn($response);
+
+        $result = $this->underTest->fetchPerson(self::PERSON_ID);
 
         $this->assertEquals($expectedResult, $result);
     }
